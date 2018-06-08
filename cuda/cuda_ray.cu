@@ -72,8 +72,10 @@ int main(int argc, char *argv[]) {
 	unsigned char *dev_bitmap, *bitmap;
 	FILE* fp = fopen(argv[1], "w");
 	Sphere *s;
+
 	cudaMalloc((void **)&dev_bitmap, sizeof(unsigned char) * DIM * DIM * 4);
 	cudaMalloc((void **)&s, sizeof(Sphere) * SPHERES);
+
 	Sphere *temp_s = new Sphere[SPHERES];
 	bitmap = (unsigned char *)malloc(sizeof(unsigned char) * DIM * DIM * 4);
 	//bitmap 생성하고 다시 하자.
@@ -88,16 +90,25 @@ int main(int argc, char *argv[]) {
 	}
 	cudaMemcpy(s, temp_s, sizeof(Sphere) * SPHERES, cudaMemcpyHostToDevice);
 	delete[] temp_s;
+
 	dim3 grids(DIM / 16, DIM / 16);
 	dim3 threads(16, 16);
+
 	clock_t startTime = clock();
 	kernel<<<grids, threads >>>(s, dev_bitmap);
+	cudaDeviceSynchronize();
 	clock_t endTime = clock();
+
 	cudaMemcpy(bitmap, dev_bitmap, sizeof(unsigned char) * DIM * DIM * 4, cudaMemcpyDeviceToHost);
+
 	ppm_write(bitmap, DIM, DIM, fp);
+
 	cudaFree(dev_bitmap);
 	cudaFree(s);
 	fclose(fp);
-	std::cout << "running time : " << (double)(endTime - startTime) / CLOCKS_PER_SEC << std::endl;
+
+	double execute_time = (double)(endTime - startTime) / CLOCKS_PER_SEC;
+
+	std::cout << "CUDA ray tracing: " << std::fixed << execute_time << " sec" << std::endl;
 	return 0;
 }
