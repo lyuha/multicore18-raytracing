@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="openmp_ray.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <omp.h>
 
 #define CUDA 0
 #define OPENMP 1
@@ -12,21 +13,22 @@
 #define INF 2e10f
 #define DIM 2048
 
-struct Sphere {
+typedef struct Sphere {
 	float   r, b, g;
 	float   radius;
 	float   x, y, z;
-	float hit(float ox, float oy, float *n) {
-		float dx = ox - x;
-		float dy = oy - y;
-		if (dx*dx + dy * dy < radius*radius) {
-			float dz = sqrtf(radius*radius - dx * dx - dy * dy);
-			*n = dz / sqrtf(radius * radius);
-			return dz + z;
-		}
-		return -INF;
+} Sphere;
+
+float hit(Sphere* s, float ox, float oy, float *n) {
+	float dx = ox - s->x;
+	float dy = oy - s->y;
+	if (dx*dx + dy * dy < s->radius*s->radius) {
+		float dz = sqrtf(s->radius*s->radius - dx * dx - dy * dy);
+		*n = dz / sqrtf(s->radius * s->radius);
+		return dz + s->z;
 	}
-};
+	return -INF;
+}
 
 void kernel(int x, int y, Sphere* s, unsigned char* ptr)
 {
@@ -37,10 +39,13 @@ void kernel(int x, int y, Sphere* s, unsigned char* ptr)
 	//printf("x:%d, y:%d, ox:%f, oy:%f\n",x,y,ox,oy);
 
 	float r = 0, g = 0, b = 0;
-	float   maxz = -INF;
-	for (int i = 0; i < SPHERES; i++) {
+	float maxz = -INF;
+
+	int i = 0;
+
+	for (i = 0; i < SPHERES; i++) {
 		float   n;
-		float   t = s[i].hit(ox, oy, &n);
+		float   t = hit(&s[i], ox, oy, &n);
 		if (t > maxz) {
 			float fscale = n;
 			r = s[i].r * fscale;
@@ -74,7 +79,7 @@ void ppm_write(unsigned char* bitmap, const int xdim, const int ydim, FILE* fp)
 int main(int argc, char* argv[])
 {
 	int no_threads;
-	int option;
+
 	int x, y;
 	unsigned char* bitmap;
 	FILE *fp;
@@ -90,18 +95,14 @@ int main(int argc, char* argv[])
 
 	fopen_s(&fp, argv[2], "w");
 
-	if (strcmp(argv[1], "0") == 0) {
-		option = CUDA;
-	}
-	else {
-		option = OPENMP;
-		no_threads = atoi(argv[1]);
-	}
+	no_threads = atoi(argv[1]);
+
+	omp_set_num_threads(no_threads);
 
 	Sphere *temp_s = (Sphere*)malloc(sizeof(Sphere) * SPHERES);
 
 	int i = 0;
-#pragma omp parallel for default(none) private(i) shared(temp_s)
+
 	for (i = 0; i < SPHERES; i++) {
 		temp_s[i].r = rnd(1.0f);
 		temp_s[i].g = rnd(1.0f);
@@ -114,17 +115,26 @@ int main(int argc, char* argv[])
 
 	bitmap = (unsigned char*)malloc(sizeof(unsigned char)*DIM*DIM * 4);
 
+	clock_t start_clock = clock();
+
 #pragma omp parallel for default(none) private(x, y) shared(bitmap, temp_s)
 	for (x = 0; x < DIM; x++) {
 		for (y = 0; y < DIM; y++) {
 			kernel(x, y, temp_s, bitmap);
 		}
 	}
+
+	clock_t end_clock = clock();
+
 	ppm_write(bitmap, DIM, DIM, fp);
 
 	fclose(fp);
 	free(bitmap);
 	free(temp_s);
+
+	double execute_time = ((double)(end_clock - start_clock)) / CLOCKS_PER_SEC;
+
+	printf_s("OpenMP (%d threads) ray tracing: %f sec", no_threads, execute_time);
 
 	return 0;
 }
