@@ -139,9 +139,6 @@
   <ItemGroup>
     <CudaCompile Include="thrust_ray.cu" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="cpp.hint" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(CUDAPropsPath)\CUDA 9.2.targets" />

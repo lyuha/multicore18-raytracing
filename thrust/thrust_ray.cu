@@ -4,6 +4,9 @@
 #include <cmath>
 #include <memory.h>
 
+#include <cuda.h>
+#include <cuda_runtime.h>
+
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 #include <thrust/execution_policy.h>
@@ -188,6 +191,7 @@ int main(int argc, char *argv[]) {
 	clock_t startTime = clock();
 
 	thrust::transform(offset_equence.cbegin(), offset_equence.cend(), bitmap.begin(), determine_color_functor(device_spheres.begin(), device_spheres.end()));
+	cudaThreadSynchronize();
 
 	clock_t endTime = clock();
 
@@ -195,7 +199,9 @@ int main(int argc, char *argv[]) {
 
 	fclose(fp);
 
-	std::cout << "THRUST ray tracing: " << (double)(endTime - startTime) / CLOCKS_PER_SEC << " sec" << std::endl;
+	double execute_time = (double)(endTime - startTime) / CLOCKS_PER_SEC;
+
+	std::cout << "Thrust ray tracing: " << std::fixed << execute_time << " sec" << std::endl;
 
 	return 0;
 }
