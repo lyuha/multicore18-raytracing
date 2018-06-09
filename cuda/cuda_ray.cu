@@ -6,7 +6,6 @@
 #include <device_functions.h>
 #include <time.h>
 
-
 #define rnd( x ) (x * rand() / RAND_MAX)
 #define SPHERES 20
 #define INF 2e10f
@@ -16,6 +15,7 @@ struct Sphere {
 	float r, b, g;
 	float radius;
 	float x, y, z;
+
 	__device__ float hit(float ox, float oy, float *n) {
 		float dx = ox - x;
 		float dy = oy - y;
@@ -28,16 +28,14 @@ struct Sphere {
 	}
 };
 
-
 void ppm_write(unsigned char* bitmap, int xdim, int ydim, FILE* fp)
 {
-	int i, x, y;
 	fprintf(fp, "P3\n");
 	fprintf(fp, "%d %d\n", xdim, ydim);
 	fprintf(fp, "255\n");
-	for (y = 0; y<ydim; y++) {
-		for (x = 0; x<xdim; x++) {
-			i = x + y * xdim;
+	for (int y = 0; y < ydim; y++) {
+		for (int x = 0; x < xdim; x++) {
+			int i = x + y * xdim;
 			fprintf(fp, "%d %d %d ", bitmap[4 * i], bitmap[4 * i + 1], bitmap[4 * i + 2]);
 		}
 		fprintf(fp, "\n");
@@ -60,6 +58,7 @@ __global__ void kernel(Sphere *s, unsigned char *ptr) {
 			r = s[i].r * fscale;
 			g = s[i].g * fscale;
 			b = s[i].b * fscale;
+			maxz = t;
 		}
 	}
 	ptr[offset * 4 + 0] = (int)(r * 255);
@@ -95,7 +94,7 @@ int main(int argc, char *argv[]) {
 	dim3 threads(16, 16);
 
 	clock_t startTime = clock();
-	kernel<<<grids, threads >>>(s, dev_bitmap);
+	kernel<<<grids, threads>>>(s, dev_bitmap);
 	cudaDeviceSynchronize();
 	clock_t endTime = clock();
 
