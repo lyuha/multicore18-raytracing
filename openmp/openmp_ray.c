@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
 
 	clock_t start_clock = clock();
 
-#pragma omp parallel for default(none) private(x, y) shared(bitmap, temp_s)
+#pragma omp parallel for schedule(static) default(none) private(x, y) shared(bitmap, temp_s)
 	for (x = 0; x < DIM; x++) {
 		for (y = 0; y < DIM; y++) {
 			kernel(x, y, temp_s, bitmap);
