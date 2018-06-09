@@ -72,7 +72,6 @@ void ppm_write(unsigned char* bitmap, int xdim, int ydim, FILE* fp)
 
 int main(int argc, char* argv[])
 {
-	int no_threads;
 	int option;
 
 	unsigned char* bitmap;
