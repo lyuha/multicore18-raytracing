@@ -179,6 +179,8 @@ int main(int argc, char *argv[]) {
 
 	FILE* fp = fopen(argv[1], "w");
 
+	srand((unsigned int)time(NULL));
+
 	thrust::host_vector<Color> image(DIM * DIM);
 	thrust::host_vector<Sphere> spheres(SPHERES);
 	thrust::generate(spheres.begin(), spheres.end(), generate_random_sphere);
