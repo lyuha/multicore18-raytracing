@@ -24,7 +24,7 @@ float hit(Sphere* s, float ox, float oy, float *n) {
 	float dy = oy - s->y;
 	if (dx*dx + dy * dy < s->radius*s->radius) {
 		float dz = sqrtf(s->radius*s->radius - dx * dx - dy * dy);
-		*n = dz / sqrtf(s->radius * s->radius);
+		*n = dz / s->radius;
 		return dz + s->z;
 	}
 	return -INF;
@@ -41,11 +41,9 @@ void kernel(int x, int y, Sphere* s, unsigned char* ptr)
 	float r = 0, g = 0, b = 0;
 	float maxz = -INF;
 
-	int i = 0;
-
-	for (i = 0; i < SPHERES; i++) {
-		float   n;
-		float   t = hit(&s[i], ox, oy, &n);
+	for (int i = 0; i < SPHERES; i++) {
+		float n;
+		float t = hit(&s[i], ox, oy, &n);
 		if (t > maxz) {
 			float fscale = n;
 			r = s[i].r * fscale;
@@ -88,7 +86,7 @@ int main(int argc, char* argv[])
 
 	if (argc != 3) {
 		printf("> a.out [option] [filename.ppm]\n");
-		printf("[option] 0: CUDA, 1~16: OpenMP using 1~16 threads\n");
+		printf("[option] 1~16: OpenMP using 1~16 threads\n");
 		printf("for example, '> a.out 8 result.ppm' means executing OpenMP with 8 threads\n");
 		exit(0);
 	}
