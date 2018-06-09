@@ -1,8 +1,8 @@
 #include <iostream>
 #include <ctime>
+#include <cstdlib>
 #include <cstdint>
 #include <cmath>
-#include <memory.h>
 
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -15,7 +15,7 @@
 #include <thrust/transform_reduce.h>
 #include <thrust/pair.h>
 
-#define rnd( x ) (x * rand() / RAND_MAX)
+#define rnd( x ) (x * std::rand() / RAND_MAX)
 #define SPHERES 20
 #define INF 2e10f
 #define DIM 2048
@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
 
 	FILE* fp = fopen(argv[1], "w");
 
-	srand((unsigned int)time(NULL));
+	std::srand((unsigned int)std::time(NULL));
 
 	thrust::host_vector<Color> image(DIM * DIM);
 	thrust::host_vector<Sphere> spheres(SPHERES);
