@@ -52,18 +52,6 @@ struct Sphere {
 	}
 };
 
-__device__
-float is_hit(const Sphere& sphere, const float& ox, const float& oy, float& n) {
-	float dx = ox - sphere.x;
-	float dy = oy - sphere.y;
-	if (dx * dx + dy * dy < sphere.radius * sphere.radius) {
-		float dz = std::sqrt(sphere.radius * sphere.radius - dx * dx - dy * dy);
-		n = dz / std::sqrt(sphere.radius * sphere.radius);
-		return dz + sphere.z;
-	}
-	return -INF;
-}
-
 __host__
 Sphere generate_random_sphere() {
 	Sphere s = Sphere();
