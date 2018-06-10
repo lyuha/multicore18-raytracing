@@ -1,12 +1,17 @@
 #include <iostream>
+#include <ctime>
+#include <cmath>
+#include <cstdlib>
+
 #include <cuda.h>
 #include <cuda_runtime.h>
-#include <math.h>
+
 #include <device_launch_parameters.h>
 #include <device_functions.h>
-#include <time.h>
 
-#define rnd( x ) (x * rand() / RAND_MAX)
+
+
+#define rnd( x ) (x * std::rand() / RAND_MAX)
 #define SPHERES 20
 #define INF 2e10f
 #define DIM 2048
@@ -20,8 +25,8 @@ struct Sphere {
 		float dx = ox - x;
 		float dy = oy - y;
 		if (dx * dx + dy * dy < radius * radius) {
-			float dz = sqrtf(radius * radius - dx * dx - dy * dy);
-			*n = dz / sqrtf(radius * radius);
+			float dz = std::sqrt(radius * radius - dx * dx - dy * dy);
+			*n = dz / radius;
 			return dz + z;
 		}
 		return -INF;
@@ -71,6 +76,8 @@ int main(int argc, char *argv[]) {
 	unsigned char *dev_bitmap, *bitmap;
 	FILE* fp = fopen(argv[1], "w");
 	Sphere *s;
+
+	std::srand((unsigned int)std::time(NULL));
 
 	cudaMalloc((void **)&dev_bitmap, sizeof(unsigned char) * DIM * DIM * 4);
 	cudaMalloc((void **)&s, sizeof(Sphere) * SPHERES);
