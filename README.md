@@ -40,7 +40,7 @@ If you want compile in VS2017 command prompt, see below section.
 
 Execution time is average value over 3 execution times.
 
-Tested on AMD Ryzen 1700X and GTX 760.
+Tested on Windows 10 x64, AMD Ryzen 1700X and GTX 760.
 
 | Version | execution time(s) |
 | --- | --- |
